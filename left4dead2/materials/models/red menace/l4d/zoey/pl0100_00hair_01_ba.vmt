@@ -1,0 +1,25 @@
+patch
+{
+
+include "materials/models/survivors/survivors_it_shared.vmt"
+insert
+{
+
+$basetexture "models/Red Menace/L4D/Zoey/pl0100_00hair_01_BM"
+$bumpmap "models/Red Menace/L4D/Zoey/pl0100_00hair_01_BM_NRM"
+$alphatest 1
+$allowalphatocoverage 1
+$alphatestreference 0.5	
+$nocull 1
+$nodecal 1
+
+$phongexponent 1.05
+$phongboost 3.05	
+$Halflambert 1
+$phongfresnelranges [2.5 4.5 5.5]
+$phongtint [0.25 0.25 0.25]
+$phongwarptexture "models/Red Menace/L4D/Zoey/phongwarp_hair"
+$lightwarptexture  "models/Red Menace/L4D/Zoey/lightwarp"
+
+}
+}

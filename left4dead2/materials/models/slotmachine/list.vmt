@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+    "$basetexture" "slotmachine/list"
+    "$surfaceprop" "glass"
+    "$nodecal" "1"
+    //"$selfillum" "1"
+}

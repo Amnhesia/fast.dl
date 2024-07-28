@@ -1,0 +1,12 @@
+VertexLitGeneric
+{
+$baseTexture "models\survivors\lethalcoach\Coach_Equipment_BaseColor"
+$bumpmap "models\survivors\lethalcoach/Coach_Equipment_NormalMap"
+$basemapalphaphongmask 1
+$halflambert 1
+$phong 1
+$phongboost 1
+$phongexponent 30
+$phongfresnelranges "[5 5 15]"
+$BASEMAPLUMINANCEPHONGMASK 1
+}

@@ -1,0 +1,11 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/player/slow/amberlyn/sm_galaxy/luma/slow_body"
+
+	"$selfillum" 1
+
+ 	"$phong" "1"
+	"$phongexponent" "6"
+	"$phongboost"	"0.55"
+	"$phongfresnelranges"	"[1 .5 .5]"
+}

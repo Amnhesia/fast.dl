@@ -1,0 +1,13 @@
+vertexlitgeneric
+{
+
+$baseTexture "models\survivors\rat_zoey\rat_zoey_dif"
+$bumpmap "effects/flat_normal"
+$halflambert 1
+$phong 1
+$phongboost ".001"
+$phongexponent 5
+$phongtint "[.85 .85 1]"
+$phongfresnelranges "[.5 .85 30]"
+$ambientocclusion 1
+}

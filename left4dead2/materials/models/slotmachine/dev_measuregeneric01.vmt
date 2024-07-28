@@ -1,0 +1,6 @@
+VertexLitGeneric
+{
+	$basetexture "Dev/dev_measuregeneric01"
+	$surfaceprop concrete
+	"$nodecal" "1"
+}

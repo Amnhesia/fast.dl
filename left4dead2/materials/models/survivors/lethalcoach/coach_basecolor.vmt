@@ -1,0 +1,20 @@
+vertexlitgeneric
+{
+
+$baseTexture "models\survivors\lethalcoach\Coach_BaseColor"
+$bumpmap "models\survivors\lethalcoach/Coach_NormalMap"
+
+$nocull 0
+$normalmapalphaenvmapmask 1
+
+"$envmaptint" "[0.04 0.04 0.04]"
+
+"$phong" "1"						
+"$phongboost"	"1" 
+
+"$rimlight" "1"
+"$rimmask" "1"
+"$rimlightboost" "1"
+         $nodecal 1
+
+}

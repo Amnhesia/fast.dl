@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	 crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/skin/blue.monday/css/jplayer.blue.monday.min.css"
+	 integrity="sha256-K33UYwMg11wyxTCSX4C2k9nfMVE5yrJc6PD48+lzlOE=" crossorigin="anonymous" />
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js" integrity="sha256-YAIw54P6OPiIkUJq8S3ayOEunEz/MiK2AxDY0oFLNBs="
+	 crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		function get(name) {
+			if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+				return decodeURIComponent(name[1]);
+		}
+
+	</script>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+
+			var stream = {
+				title: "Radio",
+				mp3: get('url')
+			},
+				ready = false;
+
+			$("#jquery_jplayer_1").jPlayer({
+				ready: function (event) {
+					ready = true;
+					// Set initial volume for connect
+					$(this).jPlayer("volume", get('volume'));
+					$(this).jPlayer("setMedia", stream).jPlayer("play"); // Auto-play audio also
+				},
+				pause: function () {
+					$(this).jPlayer("clearMedia");
+				},
+				error: function (event) {
+					if (ready && event.jPlayer.error.type === $.jPlayer.error.URL_NOT_SET) {
+						// Setup the media stream again and play it.
+						$(this).jPlayer("setMedia", stream).jPlayer("play");
+					}
+				},
+				swfPath: "https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.swf",
+				supplied: "mp3",
+				preload: "none",
+				wmode: "window",
+				useStateClassSkin: true,
+				autoBlur: false,
+				keyEnabled: true
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<div id="jquery_jplayer_1" class="jp-jplayer" align="center">
+
+	</div>
+	<div id="jp_container_1" class="jp-audio-stream" role="application" aria-label="media player">
+		<div class="jp-type-single">
+			<div class="jp-gui jp-interface">
+				<div class="jp-controls">
+					<button class="jp-play" role="button" tabindex="0">play</button>
+				</div>
+				<div class="jp-volume-controls">
+					<button class="jp-mute" role="button" tabindex="0">mute</button>
+					<button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+					<div class="jp-volume-bar">
+						<div class="jp-volume-bar-value"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="jp-no-solution">
+				<span>Update Required</span> To play the media you will need to either update your browser to a recent version or update
+				your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

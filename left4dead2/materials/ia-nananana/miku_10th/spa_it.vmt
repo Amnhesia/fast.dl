@@ -1,0 +1,30 @@
+VertexLitGeneric
+{
+$bumpmap "IA-NanaNana/Miku_10th/normal"
+"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\basewarp"
+$phong 1
+$phongexponent "360"
+$phongboost "5"
+$phongfresnelranges "[.2 .85 30]"
+$PhongAlbedoTint "1"
+$alphatest 1
+$nocull 1
+$nodecal 1
+$detail "models\survivors\survivor_it.vtf"
+$detailscale 3
+$detailblendfactor ".001" 
+$detailblendmode 0
+$ITAmount 0
+Proxies
+{
+IT
+{
+resultVar $ITAmount
+}
+Equals
+{
+srcVar1 $ITAmount
+resultVar $detailblendfactor
+}
+}
+}

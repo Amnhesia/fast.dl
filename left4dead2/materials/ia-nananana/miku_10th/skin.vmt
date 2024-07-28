@@ -1,0 +1,14 @@
+patch
+{
+	include "materials\IA-NanaNana\Miku_10th\shader.vmt"
+	insert
+	{
+		"$basetexture" "IA-NanaNana\Miku_10th\body"
+	}
+	replace
+	{
+		"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\skinwarp"
+		$alphatest 0
+		$nocull 0
+	}
+}

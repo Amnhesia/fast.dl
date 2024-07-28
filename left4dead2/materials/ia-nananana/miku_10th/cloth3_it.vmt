@@ -1,0 +1,8 @@
+patch
+{
+	include "materials\IA-NanaNana/Miku_10th/spa_it.vmt"
+	insert
+	{
+		$basetexture "IA-NanaNana/Miku_10th/q2"
+	}
+}

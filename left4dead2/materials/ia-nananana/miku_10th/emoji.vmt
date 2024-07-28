@@ -1,0 +1,10 @@
+VertexLitGeneric
+{
+	"$basetexture" "IA-NanaNana\Miku_10th\body"
+	"$bumpmap" "IA-NanaNana\Miku_10th\normal"
+	"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\basewarp"
+	$alphatest 1
+	$allowalphatocoverage 1
+	$nocull 1
+	$nodecal 1
+}

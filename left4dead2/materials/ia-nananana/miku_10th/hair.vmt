@@ -1,0 +1,13 @@
+patch
+{
+	include "materials\IA-NanaNana\Miku_10th\shader.vmt"
+	insert
+	{
+		"$basetexture" "IA-NanaNana\Miku_10th\Hair01"
+	}
+	replace
+	{
+		"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\hairwarp"
+		"$phongboost"	".5"
+	}
+}

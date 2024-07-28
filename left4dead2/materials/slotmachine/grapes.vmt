@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+    "$basetexture" "slotmachine/grapes"
+    "$surfaceprop" "default"
+    "$nodecal" "1"
+}

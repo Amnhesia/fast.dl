@@ -1,0 +1,19 @@
+patch
+{
+	include "materials\IA-NanaNana\Miku_10th\shader.vmt"
+	insert
+	{
+		"$basetexture" "IA-NanaNana\Miku_10th\body"
+
+		"$detail" "IA-NanaNana\Miku_10th\black"
+		"$detailscale" "1"
+		"$detailblendfactor" ".3"
+		"$detailblendmode" "5"
+	}
+	replace
+	{
+		"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\eyewarp"
+		"$phongboost"	"24"
+		"$phongfresnelranges"	"[0 0 1]"
+	}
+}

@@ -1,0 +1,22 @@
+VertexLitGeneric
+{
+	"$basetexture" "IA-NanaNana\Miku_10th\q2"
+	"$bumpmap" "IA-NanaNana\Miku_10th\normal"
+	"$lightwarptexture" "IA-NanaNana\Miku_10th\shader\basewarp"
+
+	"$phong" "1"
+	"$phongboost"	".1"
+	"$phongalbedotint" "1"
+	"$phongexponenttexture" "IA-NanaNana\Miku_10th\phong_exp"
+	"$phongfresnelranges"	"[1 .1 .1]"
+	$phongexponent 5
+
+	$selfillum 1
+	$selfillummask "IA-NanaNana\Miku_10th\q2"
+	
+	$translucent 1
+	$nocull 1
+	$nodecal 1
+	$halflambert 1
+	$ambientocclusion 1
+}

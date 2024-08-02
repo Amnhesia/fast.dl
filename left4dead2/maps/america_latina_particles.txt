@@ -1,0 +1,4 @@
+particles_manifest
+{
+	"file"	"particles/hit_nums.pcf"
+}

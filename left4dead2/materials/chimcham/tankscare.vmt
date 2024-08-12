@@ -1,0 +1,15 @@
+"UnLitGeneric"
+{
+	"$basetexture" "chimcham/tankscare"
+	"$translucent" 1
+	"$additive" 0
+	 $alpha 1
+"Proxies"
+{
+"AnimatedTexture"
+{
+"animatedTextureVar" "$basetexture"
+"animatedTextureFrameNumVar" "$frame"
+"animatedTextureFrameRate" "15"
+} 
+}

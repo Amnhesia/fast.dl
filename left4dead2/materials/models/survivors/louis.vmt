@@ -1,0 +1,17 @@
+VertexLitGeneric
+{
+
+$basetexture "Models/survivors/louis"
+
+$bumpmap "Models/survivors/male_nm"
+$halflambert 1
+$phong 1
+$phongboost "1.5"
+$phongexponent 7
+$phongtint "[.80 .80 1]"
+$phongfresnelranges "[.3 .65 1]"
+$nodecal 1
+$ambientocclusion 1
+
+
+}

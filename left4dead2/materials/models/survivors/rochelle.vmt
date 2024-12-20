@@ -1,0 +1,19 @@
+VertexLitGeneric
+{
+
+$basetexture "Models/survivors/rochelle"
+
+$bumpmap "Models/survivors/fem_nm"
+$phong 1
+$phongboost "1.4"
+
+$phongtint "[.85 .85 1]"
+$phongfresnelranges "[.2 .5 5]"
+$nodecal 1
+$ambientocclusion 1
+$halflambert 0
+$diffuseexp "1.5"
+$lightwarptexture "models\survivors\coach\coach_head_wrp"
+
+
+}

@@ -3,108 +3,198 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SaySounds · FRAN SERVER</title>
+<title>SaySounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #12100e; --panel: #1c1916; --line: #322c26; --text: #ece6dc; --muted: #9c9284;
-    --accent: #e8a33d; --accent-ink: #1a1206; --ok: #6fbf73; --bad: #e36a5a;
+    --bg: #0b0a09;
+    --card: #1a1612;
+    --card2: #211c17;
+    --line: #2f2822;
+    --line2: #3d342b;
+    --text: #f1ebe2;
+    --muted: #9a8f80;
+    --dim: #6c6257;
+    --accent: #f0a430;
+    --accent2: #ff6a2b;
+    --ink: #1b1104;
+    --ok: #7ccf7f;
+    --bad: #ff6b5b;
+    --radius: 14px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, "Segoe UI", sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
-  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: .5px; }
-  h1 span { color: var(--accent); }
-  h2 { font-size: 17px; margin: 0 0 12px; }
-  .sub { color: var(--muted); margin: 0 0 22px; }
-  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 18px; }
-  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-  input[type=text], input[type=password], input[type=file] {
-    width: 100%; padding: 9px 10px; background: #0f0d0b; border: 1px solid var(--line); border-radius: 6px; color: var(--text); font: inherit;
+  html, body { margin: 0; }
+  body {
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(240,164,48,.13), transparent 60%),
+      radial-gradient(800px 400px at 100% 100%, rgba(255,106,43,.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font: 15px/1.5 Inter, system-ui, "Segoe UI", sans-serif;
+    min-height: 100vh;
   }
+  main { max-width: 920px; margin: 0 auto; padding: 36px 16px 70px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
+  h1 {
+    font-family: "Bebas Neue", Impact, sans-serif; font-weight: 400;
+    font-size: 64px; line-height: .9; letter-spacing: 2px; margin: 0;
+    background: linear-gradient(180deg, #ffd38a 0%, var(--accent) 45%, var(--accent2) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .quota {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 7px 14px 7px 10px;
+    font-size: 13px; color: var(--muted); white-space: nowrap;
+  }
+  .dots { display: inline-flex; gap: 4px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line2); }
+  .dots i.on { background: var(--accent); box-shadow: 0 0 8px rgba(240,164,48,.6); }
+
+  .card { background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+  .card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; flex-wrap: wrap; }
+  .card-title h2 { margin: 0; font: 600 13px Inter, sans-serif; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); }
+
+  .drop {
+    position: relative; display: flex; align-items: center; gap: 16px;
+    border: 1.5px dashed var(--line2); border-radius: 12px; padding: 18px; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.over { border-color: var(--accent); background: rgba(240,164,48,.05); }
+  .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .drop .icon { flex: 0 0 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: rgba(240,164,48,.12); color: var(--accent); }
+  .drop b { display: block; font-weight: 600; word-break: break-all; }
+  .drop span { color: var(--muted); font-size: 13px; }
+
+  .wave { margin-top: 16px; display: none; align-items: center; gap: 12px; background: #0f0d0b; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .wave.show { display: flex; }
+  .wave canvas { flex: 1; height: 56px; width: 100%; min-width: 0; }
+  .wave .time { font: 600 12px Inter, sans-serif; color: var(--muted); min-width: 44px; text-align: right; }
+
+  .play { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; background: var(--accent); color: var(--ink); display: grid; place-items: center; padding: 0; }
+  .play:hover { filter: brightness(1.1); }
+  .play svg { width: 16px; height: 16px; }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+  @media (max-width: 620px) { .fields { grid-template-columns: 1fr; } h1 { font-size: 52px; } }
+  label.lbl { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+  label.lbl em { font-style: normal; color: var(--dim); letter-spacing: 0; text-transform: none; font-weight: 500; }
+  .namebox { display: flex; align-items: center; background: #0f0d0b; border: 1px solid var(--line2); border-radius: 10px; padding: 0 12px; transition: border-color .15s; }
+  .namebox:focus-within { border-color: var(--accent); }
+  .namebox input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font: 600 18px Inter, sans-serif; padding: 11px 0; letter-spacing: .5px; }
+  .namebox .count { font-size: 12px; color: var(--dim); font-weight: 600; }
+  .namebox .count.full { color: var(--accent); }
   input[type=range] { width: 100%; accent-color: var(--accent); }
-  .row { display: flex; gap: 14px; flex-wrap: wrap; }
-  .row > div { flex: 1 1 200px; }
-  button {
-    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 9px 16px;
-    font: 600 14px system-ui, sans-serif; cursor: pointer;
+  .vol { display: flex; align-items: center; gap: 12px; height: 46px; }
+  .vol output { min-width: 38px; text-align: right; font-weight: 700; color: var(--accent); }
+
+  .toggle { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  .bar { display: flex; align-items: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .btn {
+    border: 0; border-radius: 10px; padding: 12px 26px; cursor: pointer;
+    font: 700 14px Inter, sans-serif; letter-spacing: .3px;
+    background: linear-gradient(180deg, #ffbb52, var(--accent)); color: var(--ink);
+    box-shadow: 0 6px 20px -8px rgba(240,164,48,.7);
   }
-  button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
-  button.danger { background: transparent; color: var(--bad); border: 1px solid #5a2c26; padding: 5px 10px; }
-  button:disabled { opacity: .45; cursor: default; }
-  .actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
-  .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--text); font-size: 14px; }
-  .status { margin-top: 12px; font-size: 14px; white-space: pre-line; }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:disabled { opacity: .35; cursor: default; filter: none; box-shadow: none; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line2); box-shadow: none; }
+  .specs { font-size: 12px; color: var(--dim); }
+
+  .status { margin-top: 14px; font-size: 14px; white-space: pre-line; }
+  .status:empty { margin: 0; }
   .status.ok { color: var(--ok); } .status.bad { color: var(--bad); }
-  .hint { color: var(--muted); font-size: 13px; }
-  details { margin-top: 10px; } summary { cursor: pointer; color: var(--accent); font-size: 14px; }
-  ol { padding-left: 20px; margin: 8px 0; } li { margin: 3px 0; }
-  code { background: #0f0d0b; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 13px; }
-  audio { width: 100%; margin-top: 10px; height: 36px; }
-  table { width: 100%; border-collapse: collapse; }
-  td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
-  td.name { font-weight: 600; white-space: nowrap; }
-  td.vol { color: var(--muted); white-space: nowrap; width: 70px; }
-  td audio { margin: 0; min-width: 160px; }
-  td.del { width: 1%; }
-  .empty { color: var(--muted); padding: 10px 0; }
-  .pill { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
-  @media (max-width: 560px) { td.vol { display: none; } td audio { min-width: 110px; } }
+  .status.busy::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; border: 2px solid var(--line2); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .search { background: #0f0d0b; border: 1px solid var(--line2); border-radius: 99px; color: var(--text); padding: 7px 14px; font: inherit; font-size: 13px; width: 180px; outline: 0; }
+  .search:focus { border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .sound { display: flex; align-items: center; gap: 12px; background: #0f0d0b; border: 1px solid var(--line); border-radius: 12px; padding: 10px; transition: border-color .15s; }
+  .sound:hover { border-color: var(--line2); }
+  .sound .play { flex-basis: 34px; width: 34px; height: 34px; }
+  .sound .play svg { width: 13px; height: 13px; }
+  .sound .info { flex: 1; min-width: 0; }
+  .sound .name { font-weight: 700; font-size: 15px; letter-spacing: .4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sound .meta { font-size: 12px; color: var(--dim); }
+  .sound .del { background: none; border: 0; color: var(--dim); cursor: pointer; padding: 6px; border-radius: 8px; display: grid; place-items: center; }
+  .sound .del:hover { color: var(--bad); background: rgba(255,107,91,.1); }
+  .empty { color: var(--dim); text-align: center; padding: 26px 0; font-size: 14px; grid-column: 1 / -1; }
+
+  footer { margin-top: 30px; text-align: center; }
+  details.admin { display: inline-block; text-align: left; font-size: 13px; color: var(--dim); }
+  details.admin summary { cursor: pointer; list-style: none; text-align: center; }
+  details.admin summary::-webkit-details-marker { display: none; }
+  details.admin[open] { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .adminrow { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .adminrow input { background: #0f0d0b; border: 1px solid var(--line2); border-radius: 8px; color: var(--text); padding: 8px 10px; font: inherit; }
+  .adminrow .btn { padding: 8px 14px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>SaySounds <span>FRAN SERVER</span></h1>
-  <p class="sub">Sube un sonido y escríbelo en el chat del servidor. Se convierte, se comprime y se publica solo; el servidor lo descarga y entra desde el próximo cambio de mapa.</p>
+  <header>
+    <h1>SaySounds</h1>
+    <div class="quota"><span class="dots" id="dots"><i></i><i></i></span><span id="quotaText">…</span></div>
+  </header>
 
-  <section>
-    <h2>Subir sonido <span class="pill" id="remaining">…</span></h2>
-    <label for="file">Archivo de audio (mp3, wav, ogg, m4a…)</label>
-    <input type="file" id="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac">
-    <div class="row">
+  <section class="card">
+    <div class="card-title"><h2>Subir sonido</h2><span class="specs">MP3 · 192 kbps · 44,1 kHz · estéreo · máx. 15 s</span></div>
+
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac">
+      <div class="icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div><b id="dropTitle">Elige o arrastra un audio</b><span id="dropSub">mp3, wav, ogg, m4a, flac…</span></div>
+    </label>
+
+    <div class="wave" id="wave">
+      <button class="play" id="previewPlay" title="Escuchar" type="button"></button>
+      <canvas id="canvas" height="56"></canvas>
+      <div class="time" id="dur">0.0 s</div>
+    </div>
+
+    <div class="fields">
       <div>
-        <label for="name">Palabra para el chat</label>
-        <input type="text" id="name" maxlength="31" placeholder="ej: hola_amigo">
+        <label class="lbl" for="name">Palabra para el chat <em>a-z, 0-9, _</em></label>
+        <div class="namebox"><input type="text" id="name" maxlength="7" autocomplete="off" spellcheck="false" placeholder="hola"><span class="count" id="count">0/7</span></div>
       </div>
       <div>
-        <label for="volume">Volumen: <b id="volLabel">1.0</b></label>
-        <input type="range" id="volume" min="0.2" max="2" step="0.1" value="1">
-      </div>
-      <div>
-        <label for="maxLen">Duración máxima: <b id="lenLabel">15 s</b></label>
-        <input type="range" id="maxLen" min="2" max="30" step="1" value="15">
+        <label class="lbl" for="volume">Volumen en el juego</label>
+        <div class="vol"><input type="range" id="volume" min="0.2" max="2" step="0.1" value="1"><output id="volOut">1.0</output></div>
       </div>
     </div>
-    <label class="check"><input type="checkbox" id="normalize" checked> Normalizar volumen (que no se oiga ni muy bajo ni saturado)</label>
-    <div class="actions">
-      <button class="ghost" id="convert" disabled>Convertir y escuchar</button>
-      <button id="upload" disabled>Subir al servidor</button>
+
+    <label class="toggle"><input type="checkbox" id="normalize" checked> Normalizar volumen</label>
+
+    <div class="bar">
+      <button class="btn" id="upload" disabled>Subir</button>
+      <span class="specs" id="sizeInfo"></span>
     </div>
-    <audio id="preview" controls hidden></audio>
     <div class="status" id="upStatus"></div>
   </section>
 
-  <section>
-    <h2>Sonidos subidos desde la web <span class="pill" id="count">…</span></h2>
-    <table><tbody id="list"></tbody></table>
-    <div class="actions"><button class="ghost" id="reload">Actualizar lista</button></div>
+  <section class="card">
+    <div class="card-title"><h2>Sonidos <span id="total"></span></h2><input class="search" id="search" placeholder="Buscar…"></div>
+    <div class="grid" id="list"></div>
     <div class="status" id="listStatus"></div>
   </section>
 
-  <section>
-    <details id="adminBox">
+  <footer>
+    <details class="admin" id="adminBox">
       <summary>Admin</summary>
-      <label for="adminKey">Clave de admin (se guarda solo en este navegador)</label>
-      <input type="password" id="adminKey" autocomplete="off">
-      <div class="actions">
-        <button id="saveAdmin">Entrar</button>
-        <button class="ghost" id="clearAdmin">Salir</button>
-        <span class="pill" id="adminState">no</span>
+      <div class="adminrow">
+        <input type="password" id="adminKey" placeholder="Clave" autocomplete="off">
+        <button class="btn" id="saveAdmin">Entrar</button>
+        <button class="btn ghost" id="clearAdmin">Salir</button>
       </div>
-      <p class="hint">Con la clave puedes borrar sonidos y subir sin límite diario.</p>
     </details>
-  </section>
-
-  <p class="hint">Cada persona puede subir 2 sonidos al día. Formato final: MP3 mono 44,1 kHz 128 kbps sin etiquetas (lo que mejor reproduce Left 4 Dead 2), más su .bz2 para el FastDL. Las palabras solo pueden llevar minúsculas, números y guion bajo.</p>
+  </footer>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
@@ -115,25 +205,288 @@ const REPO = 'Amnhesia/fast.dl', BRANCH = 'main';
 const LIST_PATH = 'saysounds/list.json';
 const SOUND_DIR = 'left4dead2/sound/saysounds_web';
 const API = 'https://api.github.com/repos/' + REPO;
-const RATE = 44100, KBPS = 128;
+const RATE = 44100, KBPS = 192, CHANNELS = 2, MAX_SECONDS = 15, MAX_NAME = 7;
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+const ICON_DEL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
 
 const $ = id => document.getElementById(id);
-let worker = '';          // URL del Cloudflare Worker (saysounds/config.json)
+let worker = '';
 let adminKey = '';
 try { adminKey = localStorage.getItem('ss_admin') || ''; } catch (e) {}
-let sounds = [];          // [{name, volume, added}]
-let serverNames = [];     // palabras que ya usa saysounds.cfg en el servidor
-let converted = null;     // {mp3: Uint8Array, seconds}
-let remaining = null;     // subidas que le quedan hoy a esta IP
+let sounds = [], serverNames = [], converted = null, remaining = null, previewUrl = '';
+const player = new Audio();
+let playingBtn = null;
 
 function setStatus(el, text, kind) { el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); }
 
+// ----------------------------------------------------------------------------- Reproductor (uno para toda la página)
+function playUrl(url, btn) {
+  if (playingBtn === btn && !player.paused) { player.pause(); return; }
+  player.src = url;
+  player.play().catch(() => {});
+  setPlaying(btn);
+}
+function setPlaying(btn) {
+  if (playingBtn) playingBtn.innerHTML = ICON_PLAY;
+  playingBtn = btn;
+  if (btn) btn.innerHTML = ICON_STOP;
+}
+player.onended = player.onpause = () => setPlaying(null);
+
+// ----------------------------------------------------------------------------- Worker y GitHub
+async function callWorker(path, body) {
+  if (!worker) throw new Error('La subida no está disponible ahora.');
+  const headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+  if (adminKey) headers['X-Admin-Key'] = adminKey;
+  const res = await fetch(worker + path, body === undefined ? { headers } : { method: 'POST', headers, body });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(data.error || ('error ' + res.status));
+  return data;
+}
+
+async function refreshQuota() {
+  const dots = $('dots').children;
+  if (!worker) { $('quotaText').textContent = 'subida no disponible'; return; }
+  try {
+    const st = await callWorker('/status');
+    remaining = st.remaining;
+    if (st.admin) {
+      $('quotaText').textContent = 'admin · sin límite';
+      for (const d of dots) d.className = 'on';
+    } else {
+      $('quotaText').textContent = st.remaining === 0 ? 'vuelve mañana' : ('te quedan ' + st.remaining + ' hoy');
+      for (let i = 0; i < dots.length; i++) dots[i].className = i < st.remaining ? 'on' : '';
+    }
+  } catch (e) { $('quotaText').textContent = 'sin conexión'; }
+  updateButtons();
+}
+
+function b64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+async function readList() {
+  const res = await fetch(API + '/contents/' + LIST_PATH + '?ref=' + BRANCH + '&t=' + Date.now(), { headers: { 'Accept': 'application/vnd.github.raw+json' } });
+  if (res.status === 404) return [];
+  if (!res.ok) throw new Error('No se pudo leer la lista (' + res.status + ')');
+  const data = await res.json();
+  return Array.isArray(data.sounds) ? data.sounds : [];
+}
+
+// ----------------------------------------------------------------------------- Conversión: MP3 192 kbps CBR, 44,1 kHz, estéreo, máx. 15 s
+function cleanName(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+/, '').slice(0, MAX_NAME).replace(/_+$/, '');
+}
+
+async function convert(file, normalize) {
+  const data = await file.arrayBuffer();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  let decoded;
+  try { decoded = await ctx.decodeAudioData(data); }
+  catch (e) { throw new Error('No se pudo leer ese audio. Prueba con mp3 o wav.'); }
+  finally { ctx.close(); }
+
+  const seconds = Math.min(decoded.duration, MAX_SECONDS);
+  const frames = Math.max(1, Math.ceil(seconds * RATE));
+  const off = new OfflineAudioContext(CHANNELS, frames, RATE);
+  const src = off.createBufferSource();
+  src.buffer = decoded;
+  src.connect(off.destination);
+  src.start(0);
+  const rendered = await off.startRendering();
+  const L = rendered.getChannelData(0), R = rendered.getChannelData(1);
+
+  // Fundido corto al final si se recortó (evita el "clic")
+  const cut = decoded.duration > MAX_SECONDS;
+  if (cut) {
+    const fade = Math.min(L.length, Math.round(RATE * 0.04));
+    for (let i = 0; i < fade; i++) { const g = i / fade; L[L.length - 1 - i] *= g; R[R.length - 1 - i] *= g; }
+  }
+
+  let peak = 0;
+  for (let i = 0; i < L.length; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+  const gain = normalize && peak > 0.001 ? 0.95 / peak : 1;
+  const toInt = ch => {
+    const out = new Int16Array(ch.length);
+    for (let i = 0; i < ch.length; i++) {
+      const v = Math.max(-1, Math.min(1, ch[i] * gain));
+      out[i] = v < 0 ? v * 0x8000 : v * 0x7fff;
+    }
+    return out;
+  };
+  const left = toInt(L), right = toInt(R);
+
+  if (typeof lamejs === 'undefined') throw new Error('No cargó el codificador MP3. Recarga la página.');
+  const enc = new lamejs.Mp3Encoder(CHANNELS, RATE, KBPS);
+  const parts = [];
+  const push = out => { if (out.length) parts.push(new Uint8Array(out.buffer, out.byteOffset, out.length).slice()); };
+  for (let i = 0; i < left.length; i += 1152) push(enc.encodeBuffer(left.subarray(i, i + 1152), right.subarray(i, i + 1152)));
+  push(enc.flush());
+  const mp3 = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let o = 0;
+  for (const p of parts) { mp3.set(p, o); o += p.length; }
+
+  return { mp3, seconds, cut, pcm: L, gain };
+}
+
+function drawWave(pcm, gain) {
+  const c = $('canvas'), dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth || 600, h = 56;
+  c.width = w * dpr; c.height = h * dpr;
+  const g = c.getContext('2d');
+  g.scale(dpr, dpr);
+  g.clearRect(0, 0, w, h);
+  const bars = Math.max(1, Math.floor(w / 4)), step = Math.max(1, Math.floor(pcm.length / bars));
+  const grad = g.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, '#ffd38a'); grad.addColorStop(.5, '#f0a430'); grad.addColorStop(1, '#ff6a2b');
+  g.fillStyle = grad;
+  for (let b = 0; b < bars; b++) {
+    let peak = 0;
+    for (let i = b * step; i < (b + 1) * step && i < pcm.length; i++) peak = Math.max(peak, Math.abs(pcm[i]));
+    const bh = Math.max(2, Math.min(1, peak * gain) * (h - 6));
+    g.fillRect(b * 4, (h - bh) / 2, 2.5, bh);
+  }
+}
+
+// ----------------------------------------------------------------------------- Formulario
+$('previewPlay').innerHTML = ICON_PLAY;
+$('volume').oninput = () => { $('volOut').textContent = (+$('volume').value).toFixed(1); };
+$('normalize').onchange = () => { if ($('file').files[0]) prepare(); };
+function onName() {
+  const v = $('name').value, clean = v.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, MAX_NAME);
+  if (v !== clean) $('name').value = clean;
+  $('count').textContent = clean.length + '/' + MAX_NAME;
+  $('count').classList.toggle('full', clean.length === MAX_NAME);
+  updateButtons();
+}
+$('name').oninput = onName;
+
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, () => drop.classList.add('over')));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
+$('file').onchange = () => {
+  const f = $('file').files[0];
+  if (!f) return;
+  $('dropTitle').textContent = f.name;
+  $('dropSub').textContent = 'Toca para cambiar el archivo';
+  if (!$('name').value) { $('name').value = cleanName(f.name); onName(); }
+  prepare();
+};
+
+async function prepare() {
+  converted = null;
+  updateButtons();
+  setStatus($('upStatus'), 'Convirtiendo…', 'busy');
+  try {
+    converted = await convert($('file').files[0], $('normalize').checked);
+    player.pause();
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(new Blob([converted.mp3], { type: 'audio/mpeg' }));
+    $('wave').classList.add('show');
+    requestAnimationFrame(() => drawWave(converted.pcm, converted.gain));
+    $('dur').textContent = converted.seconds.toFixed(1) + ' s';
+    $('sizeInfo').textContent = Math.round(converted.mp3.length / 1024) + ' KB' + (converted.cut ? ' · recortado a 15 s' : '');
+    setStatus($('upStatus'), '');
+  } catch (e) {
+    $('wave').classList.remove('show');
+    setStatus($('upStatus'), e.message, 'bad');
+  }
+  updateButtons();
+}
+window.addEventListener('resize', () => { if (converted) drawWave(converted.pcm, converted.gain); });
+
+$('previewPlay').onclick = () => { if (converted) playUrl(previewUrl, $('previewPlay')); };
+
+function nameProblem(name) {
+  if (!new RegExp('^[a-z0-9_]{2,' + MAX_NAME + '}$').test(name)) return 'La palabra debe tener de 2 a ' + MAX_NAME + ' caracteres.';
+  if (sounds.some(s => s.name === name)) return 'Ya existe un sonido con esa palabra.';
+  if (serverNames.includes(name)) return 'Esa palabra ya la usa un sonido del servidor.';
+  return '';
+}
+
+function updateButtons() {
+  $('upload').disabled = !converted || !worker || remaining === 0 || $('name').value.length < 2;
+}
+
+$('upload').onclick = async () => {
+  const name = $('name').value.trim();
+  const problem = nameProblem(name);
+  if (problem) return setStatus($('upStatus'), problem, 'bad');
+  $('upload').disabled = true;
+  try {
+    setStatus($('upStatus'), 'Comprimiendo…', 'busy');
+    await new Promise(r => setTimeout(r, 30));
+    const bz = Bzip2.compress(converted.mp3);
+    setStatus($('upStatus'), 'Subiendo…', 'busy');
+    const volume = (+$('volume').value).toFixed(1);
+    await callWorker('/upload', name + '\n' + volume + '\n' + b64(converted.mp3) + '\n' + b64(bz));
+
+    sounds = await readList().catch(() => sounds.concat([{ name, volume: +volume }]));
+    renderList();
+    setStatus($('upStatus'), '¡Listo! Escribe ' + name + ' en el chat desde el próximo mapa.', 'ok');
+    $('file').value = ''; $('name').value = ''; onName();
+    $('dropTitle').textContent = 'Elige o arrastra un audio'; $('dropSub').textContent = 'mp3, wav, ogg, m4a, flac…';
+    $('wave').classList.remove('show'); $('sizeInfo').textContent = '';
+    converted = null;
+  } catch (e) {
+    setStatus($('upStatus'), e.message, 'bad');
+  }
+  refreshQuota();
+};
+
+// ----------------------------------------------------------------------------- Lista
+async function removeSound(name) {
+  if (!confirm('¿Borrar "' + name + '"?')) return;
+  try {
+    setStatus($('listStatus'), 'Borrando…', 'busy');
+    await callWorker('/delete', name);
+    sounds = sounds.filter(s => s.name !== name);
+    renderList();
+    setStatus($('listStatus'), 'Borrado.', 'ok');
+  } catch (e) { setStatus($('listStatus'), e.message, 'bad'); }
+}
+
+function renderList() {
+  const box = $('list'), q = $('search').value.trim().toLowerCase();
+  box.textContent = '';
+  $('total').textContent = sounds.length ? '· ' + sounds.length : '';
+  const items = sounds.filter(s => s.name.includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  if (!items.length) {
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = sounds.length ? 'Nada coincide con la búsqueda.' : 'Todavía no hay sonidos.';
+    box.appendChild(e);
+    return;
+  }
+  for (const s of items) {
+    const card = document.createElement('div'); card.className = 'sound';
+    const btn = document.createElement('button'); btn.className = 'play'; btn.type = 'button'; btn.innerHTML = ICON_PLAY; btn.title = 'Escuchar';
+    btn.onclick = () => playUrl('https://raw.githubusercontent.com/' + REPO + '/' + BRANCH + '/' + SOUND_DIR + '/' + s.name + '.mp3', btn);
+    const info = document.createElement('div'); info.className = 'info';
+    const n = document.createElement('div'); n.className = 'name'; n.textContent = s.name;
+    const m = document.createElement('div'); m.className = 'meta'; m.textContent = 'vol ' + (+s.volume).toFixed(1) + (s.added ? ' · ' + s.added : '');
+    info.append(n, m);
+    card.append(btn, info);
+    if (adminKey) {
+      const d = document.createElement('button'); d.className = 'del'; d.title = 'Borrar'; d.innerHTML = ICON_DEL;
+      d.onclick = () => removeSound(s.name);
+      card.appendChild(d);
+    }
+    box.appendChild(card);
+  }
+}
+$('search').oninput = renderList;
+
+// ----------------------------------------------------------------------------- Admin
 function showAdmin() {
   $('adminKey').value = adminKey ? '••••••••' : '';
-  $('adminState').textContent = adminKey ? 'sí' : 'no';
-  if (adminKey) $('adminBox').open = true;
   renderList();
-  refreshRemaining();
+  refreshQuota();
 }
 $('saveAdmin').onclick = () => {
   const v = $('adminKey').value.trim();
@@ -148,232 +501,19 @@ $('clearAdmin').onclick = () => {
   showAdmin();
 };
 
-// ----------------------------------------------------------------------------- Worker
-async function callWorker(path, body) {
-  if (!worker) throw new Error('La subida todavía no está configurada en esta web.');
-  const headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
-  if (adminKey) headers['X-Admin-Key'] = adminKey;
-  const res = await fetch(worker + path, body === undefined ? { headers } : { method: 'POST', headers, body });
-  let data = {};
-  try { data = await res.json(); } catch (e) {}
-  if (!res.ok) throw new Error(data.error || ('error ' + res.status));
-  return data;
-}
-
-async function refreshRemaining() {
-  if (!worker) { $('remaining').textContent = 'subida no configurada'; return; }
-  try {
-    const st = await callWorker('/status');
-    remaining = st.remaining;
-    $('remaining').textContent = st.admin ? 'admin: sin límite' : ('te quedan ' + st.remaining + ' de ' + st.perDay + ' hoy');
-  } catch (e) { $('remaining').textContent = 'sin conexión'; }
-  updateButtons();
-}
-
-function b64(bytes) {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-
-async function readList() {
-  try {
-    const raw = await fetch(API + '/contents/' + LIST_PATH + '?ref=' + BRANCH + '&t=' + Date.now(), {
-      headers: { 'Accept': 'application/vnd.github.raw+json' }
-    });
-    if (raw.status === 404) return [];
-    if (!raw.ok) throw new Error(raw.status + '');
-    const data = await raw.json();
-    return Array.isArray(data.sounds) ? data.sounds : [];
-  } catch (e) {
-    throw new Error('No se pudo leer la lista (' + e.message + ')');
-  }
-}
-
-// ----------------------------------------------------------------------------- Audio
-function cleanName(s) {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 31);
-}
-
-async function convert(file, maxSeconds, normalize) {
-  const data = await file.arrayBuffer();
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  let decoded;
-  try { decoded = await ctx.decodeAudioData(data); }
-  catch (e) { throw new Error('El navegador no pudo leer ese audio. Prueba con mp3 o wav.'); }
-  finally { ctx.close(); }
-
-  const seconds = Math.min(decoded.duration, maxSeconds);
-  const frames = Math.max(1, Math.ceil(seconds * RATE));
-  // Mezcla a mono y remuestrea a 44,1 kHz
-  const off = new OfflineAudioContext(1, frames, RATE);
-  const src = off.createBufferSource();
-  src.buffer = decoded;
-  src.connect(off.destination);
-  src.start(0);
-  const rendered = await off.startRendering();
-  const pcm = rendered.getChannelData(0);
-
-  // Fundido final corto para que el recorte no haga "clic"
-  const fade = Math.min(pcm.length, Math.round(RATE * 0.03));
-  if (decoded.duration > maxSeconds) for (let i = 0; i < fade; i++) pcm[pcm.length - 1 - i] *= i / fade;
-
-  let peak = 0;
-  for (let i = 0; i < pcm.length; i++) peak = Math.max(peak, Math.abs(pcm[i]));
-  const gain = normalize && peak > 0.001 ? 0.95 / peak : 1;
-
-  const samples = new Int16Array(pcm.length);
-  for (let i = 0; i < pcm.length; i++) {
-    const v = Math.max(-1, Math.min(1, pcm[i] * gain));
-    samples[i] = v < 0 ? v * 0x8000 : v * 0x7fff;
-  }
-
-  if (typeof lamejs === 'undefined') throw new Error('No cargó el codificador MP3 (lamejs). Revisa la conexión y recarga la página.');
-  const enc = new lamejs.Mp3Encoder(1, RATE, KBPS);
-  const parts = [];
-  for (let i = 0; i < samples.length; i += 1152) {
-    const out = enc.encodeBuffer(samples.subarray(i, i + 1152));
-    if (out.length) parts.push(new Uint8Array(out.buffer, out.byteOffset, out.length).slice());
-  }
-  const end = enc.flush();
-  if (end.length) parts.push(new Uint8Array(end.buffer, end.byteOffset, end.length).slice());
-  const size = parts.reduce((n, p) => n + p.length, 0);
-  const mp3 = new Uint8Array(size);
-  let o = 0;
-  for (const p of parts) { mp3.set(p, o); o += p.length; }
-  return { mp3, seconds, cut: decoded.duration > maxSeconds };
-}
-
-// ----------------------------------------------------------------------------- UI
-$('volume').oninput = () => { $('volLabel').textContent = (+$('volume').value).toFixed(1); };
-$('maxLen').oninput = () => { $('lenLabel').textContent = $('maxLen').value + ' s'; converted = null; updateButtons(); };
-$('normalize').onchange = () => { converted = null; updateButtons(); };
-$('file').onchange = () => {
-  converted = null;
-  const f = $('file').files[0];
-  if (f && !$('name').value) $('name').value = cleanName(f.name);
-  $('preview').hidden = true;
-  updateButtons();
-};
-$('name').oninput = () => updateButtons();
-
-function nameProblem(name) {
-  if (!/^[a-z0-9_]{2,31}$/.test(name)) return 'La palabra debe tener de 2 a 31 caracteres: minúsculas, números o _';
-  if (sounds.some(s => s.name === name)) return 'Ya hay un sonido web con esa palabra (bórralo primero si quieres reemplazarlo)';
-  if (serverNames.includes(name)) return 'Esa palabra ya la usa un sonido del servidor (saysounds.cfg)';
-  return '';
-}
-
-function updateButtons() {
-  const hasFile = !!$('file').files[0];
-  $('convert').disabled = !hasFile;
-  $('upload').disabled = !hasFile || !worker || remaining === 0;
-}
-
-async function ensureConverted() {
-  if (converted) return converted;
-  setStatus($('upStatus'), 'Convirtiendo…');
-  converted = await convert($('file').files[0], +$('maxLen').value, $('normalize').checked);
-  const url = URL.createObjectURL(new Blob([converted.mp3], { type: 'audio/mpeg' }));
-  $('preview').src = url;
-  $('preview').hidden = false;
-  return converted;
-}
-
-$('convert').onclick = async () => {
-  try {
-    const c = await ensureConverted();
-    setStatus($('upStatus'), 'Listo para subir: ' + c.seconds.toFixed(1) + ' s, ' + Math.round(c.mp3.length / 1024) + ' KB' + (c.cut ? ' (recortado)' : '') + '.');
-    $('preview').play().catch(() => {});
-  } catch (e) { setStatus($('upStatus'), e.message, 'bad'); }
-};
-
-$('upload').onclick = async () => {
-  const name = $('name').value.trim();
-  const problem = nameProblem(name);
-  if (problem) return setStatus($('upStatus'), problem, 'bad');
-  $('upload').disabled = true;
-  try {
-    const c = await ensureConverted();
-    setStatus($('upStatus'), 'Comprimiendo .bz2…');
-    await new Promise(r => setTimeout(r, 30));
-    const bz = Bzip2.compress(c.mp3);
-
-    setStatus($('upStatus'), 'Subiendo…');
-    const volume = (+$('volume').value).toFixed(1);
-    const res = await callWorker('/upload', name + '\n' + volume + '\n' + b64(c.mp3) + '\n' + b64(bz));
-
-    sounds = await readList().catch(() => sounds.concat([{ name, volume: +volume }]));
-    renderList();
-    setStatus($('upStatus'), '¡Subido! El servidor lo descarga en 1-3 minutos y queda activo desde el próximo cambio de mapa.\nEn el chat: ' + name, 'ok');
-    $('file').value = ''; $('name').value = ''; converted = null; $('preview').hidden = true;
-    if (typeof res.remaining === 'number') remaining = res.remaining;
-  } catch (e) {
-    setStatus($('upStatus'), 'Error: ' + e.message, 'bad');
-  }
-  refreshRemaining();
-};
-
-async function removeSound(name) {
-  if (!confirm('¿Borrar el sonido "' + name + '"? Se quita del servidor en el próximo mapa.')) return;
-  try {
-    setStatus($('listStatus'), 'Borrando…');
-    await callWorker('/delete', name);
-    sounds = sounds.filter(s => s.name !== name);
-    renderList();
-    setStatus($('listStatus'), 'Borrado "' + name + '".', 'ok');
-  } catch (e) { setStatus($('listStatus'), 'Error: ' + e.message, 'bad'); }
-}
-
-function renderList() {
-  const body = $('list');
-  body.textContent = '';
-  $('count').textContent = sounds.length;
-  if (!sounds.length) {
-    const tr = body.insertRow(); const td = tr.insertCell();
-    td.colSpan = 4; td.className = 'empty'; td.textContent = 'Todavía no hay sonidos subidos desde la web.';
-    return;
-  }
-  for (const s of sounds.slice().sort((a, b) => a.name.localeCompare(b.name))) {
-    const tr = body.insertRow();
-    const n = tr.insertCell(); n.className = 'name'; n.textContent = s.name;
-    const v = tr.insertCell(); v.className = 'vol'; v.textContent = 'vol ' + (+s.volume).toFixed(1);
-    const a = tr.insertCell();
-    const au = document.createElement('audio');
-    au.controls = true; au.preload = 'none';
-    au.src = 'https://raw.githubusercontent.com/' + REPO + '/' + BRANCH + '/' + SOUND_DIR + '/' + s.name + '.mp3';
-    a.appendChild(au);
-    const d = tr.insertCell(); d.className = 'del';
-    if (adminKey) {
-      const b = document.createElement('button');
-      b.className = 'danger'; b.textContent = 'Borrar';
-      b.onclick = () => removeSound(s.name);
-      d.appendChild(b);
-    }
-  }
-}
-
-async function loadAll() {
-  setStatus($('listStatus'), '');
+// ----------------------------------------------------------------------------- Inicio
+(async function init() {
   try {
     const r = await fetch('config.json?t=' + Date.now());
     if (r.ok) worker = ((await r.json()).worker || '').replace(/\/+$/, '');
   } catch (e) {}
-  refreshRemaining();
-  try {
-    sounds = await readList();
-    renderList();
-  } catch (e) { setStatus($('listStatus'), e.message, 'bad'); }
   try {
     const r = await fetch('server_names.json?t=' + Date.now());
     if (r.ok) serverNames = (await r.json()).names || [];
   } catch (e) {}
-}
-$('reload').onclick = loadAll;
-
-showAdmin();
-loadAll();
+  try { sounds = await readList(); } catch (e) { setStatus($('listStatus'), e.message, 'bad'); }
+  showAdmin();
+})();
 </script>
 </body>
 </html>

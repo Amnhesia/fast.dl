@@ -26,7 +26,7 @@ const ALLOWED_ORIGIN = 'https://amnhesia.github.io';
 
 const PER_IP_PER_DAY = 2;        // subidas por IP al día
 const GLOBAL_PER_DAY = 40;       // tope total al día (protege el repo si alguien cambia de IP muchas veces)
-const MAX_MP3_BYTES = 520 * 1024; // ~30 s a 128 kbps
+const MAX_MP3_BYTES = 400 * 1024; // 15 s a 192 kbps = ~352 KB
 
 const API = 'https://api.github.com/repos/' + REPO;
 
@@ -152,14 +152,14 @@ async function upload(request, env) {
   if (parts.length !== 4) return json({ error: 'Formato inválido' }, 400);
   const [name, volText, mp3, bz2] = parts;
 
-  if (!/^[a-z0-9_]{2,31}$/.test(name)) return json({ error: 'La palabra debe tener de 2 a 31 caracteres: minúsculas, números o _' }, 400);
+  if (!/^[a-z0-9_]{2,7}$/.test(name)) return json({ error: 'La palabra debe tener de 2 a 7 caracteres: minúsculas, números o _' }, 400);
   let volume = parseFloat(volText);
   if (!(volume >= 0.2 && volume <= 2)) volume = 1;
   volume = Math.round(volume * 10) / 10;
 
   const b64 = /^[A-Za-z0-9+/]+={0,2}$/;
   if (!b64.test(mp3) || !b64.test(bz2)) return json({ error: 'Archivo inválido' }, 400);
-  if (mp3.length * 0.75 > MAX_MP3_BYTES) return json({ error: 'El sonido es demasiado largo (máx. ~30 s)' }, 400);
+  if (mp3.length * 0.75 > MAX_MP3_BYTES) return json({ error: 'El sonido es demasiado largo (máx. 15 s)' }, 400);
   if (bz2.length > mp3.length * 1.1 + 400) return json({ error: 'Archivo .bz2 inválido' }, 400);
 
   // MP3 sin etiquetas (empieza con sincronía de trama 0xFFE) y bz2 "BZh"

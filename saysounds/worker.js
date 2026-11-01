@@ -15,6 +15,8 @@
  *   GET    /status            -> { remaining, perDay }        (cuántas subidas le quedan hoy a esta IP)
  *   POST   /upload            -> cuerpo de texto: nombre \n volumen \n mp3 base64 \n bz2 base64
  *   POST   /delete            -> cuerpo: nombre   (cabecera X-Admin-Key)
+ *   GET    /names             -> { names } palabras de saysounds.cfg del servidor
+ *   POST   /names             -> JSON { names: [...] } (cabecera X-Admin-Key; lo envía el plugin en cada mapa)
  */
 
 const REPO = 'Amnhesia/fast.dl';
@@ -38,6 +40,8 @@ export default {
       if (request.method === 'GET' && url.pathname === '/status') return cors(json(await status(request, env)));
       if (request.method === 'POST' && url.pathname === '/upload') return cors(await upload(request, env));
       if (request.method === 'POST' && url.pathname === '/delete') return cors(await remove(request, env));
+      if (request.method === 'GET' && url.pathname === '/names') return cors(json({ names: await serverNames(env) }));
+      if (request.method === 'POST' && url.pathname === '/names') return cors(await saveNames(request, env));
       return cors(json({ error: 'Ruta no encontrada' }, 404));
     } catch (e) {
       return cors(json({ error: 'Error interno: ' + e.message }, 500));
@@ -169,8 +173,7 @@ async function upload(request, env) {
 
   const list = (await readJson(env, LIST_PATH, { sounds: [] })).sounds || [];
   if (list.some(s => s.name === name)) return json({ error: 'Ya existe un sonido con esa palabra' }, 409);
-  const serverNames = (await readJson(env, NAMES_PATH, { names: [] })).names || [];
-  if (serverNames.includes(name)) return json({ error: 'Esa palabra ya la usa un sonido del servidor' }, 409);
+  if ((await serverNames(env)).includes(name)) return json({ error: 'Esa palabra ya la usa un sonido del servidor' }, 409);
 
   list.push({ name, volume, added: day });
   await commitFiles(env, [
@@ -186,6 +189,25 @@ async function upload(request, env) {
     return json({ ok: true, name, remaining: Math.max(0, PER_IP_PER_DAY - used) });
   }
   return json({ ok: true, name, remaining: 999 });
+}
+
+// Palabras de saysounds.cfg: las manda el plugin del servidor en cada mapa (KV "server_names").
+// Si todavía no llegaron, se usa la copia saysounds/server_names.json del repo.
+async function serverNames(env) {
+  const stored = await env.LIMITS.get('server_names');
+  if (stored) return JSON.parse(stored);
+  return (await readJson(env, NAMES_PATH, { names: [] })).names || [];
+}
+
+async function saveNames(request, env) {
+  if (!isAdmin(request, env)) return json({ error: 'Clave de admin incorrecta' }, 403);
+  let data;
+  try { data = await request.json(); } catch (e) { return json({ error: 'JSON inválido' }, 400); }
+  if (!Array.isArray(data.names) || data.names.length > 5000) return json({ error: 'Lista inválida' }, 400);
+  const names = [...new Set(data.names.filter(n => typeof n === 'string' && n.length <= 64).map(n => n.toLowerCase()))].sort();
+  const json_ = JSON.stringify(names);
+  if ((await env.LIMITS.get('server_names')) !== json_) await env.LIMITS.put('server_names', json_);
+  return json({ ok: true, count: names.length });
 }
 
 async function remove(request, env) {

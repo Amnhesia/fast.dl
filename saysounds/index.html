@@ -507,8 +507,9 @@ $('clearAdmin').onclick = () => {
     const r = await fetch('config.json?t=' + Date.now());
     if (r.ok) worker = ((await r.json()).worker || '').replace(/\/+$/, '');
   } catch (e) {}
+  // Palabras de saysounds.cfg: las tiene el Worker (las manda el servidor en cada mapa); si no, la copia del repo
   try {
-    const r = await fetch('server_names.json?t=' + Date.now());
+    const r = await fetch(worker ? worker + '/names' : 'server_names.json?t=' + Date.now());
     if (r.ok) serverNames = (await r.json()).names || [];
   } catch (e) {}
   try { sounds = await readList(); } catch (e) { setStatus($('listStatus'), e.message, 'bad'); }

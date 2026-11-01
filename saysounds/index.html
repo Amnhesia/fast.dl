@@ -466,7 +466,7 @@ function renderList() {
   for (const s of items) {
     const card = document.createElement('div'); card.className = 'sound';
     const btn = document.createElement('button'); btn.className = 'play'; btn.type = 'button'; btn.innerHTML = ICON_PLAY; btn.title = 'Escuchar';
-    btn.onclick = () => playUrl('https://raw.githubusercontent.com/' + REPO + '/' + BRANCH + '/' + SOUND_DIR + '/' + s.name + '.mp3', btn);
+    btn.onclick = () => playUrl('https://raw.githubusercontent.com/' + REPO + '/' + BRANCH + '/' + SOUND_DIR + '/' + (s.file || s.name) + '.mp3', btn);
     const info = document.createElement('div'); info.className = 'info';
     const n = document.createElement('div'); n.className = 'name'; n.textContent = s.name;
     const m = document.createElement('div'); m.className = 'meta'; m.textContent = 'vol ' + (+s.volume).toFixed(1) + (s.added ? ' · ' + s.added : '');

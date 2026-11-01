@@ -175,10 +175,13 @@ async function upload(request, env) {
   if (list.some(s => s.name === name)) return json({ error: 'Ya existe un sonido con esa palabra' }, 409);
   if ((await serverNames(env)).includes(name)) return json({ error: 'Esa palabra ya la usa un sonido del servidor' }, 409);
 
-  list.push({ name, volume, added: day });
+  // Archivo con nombre único por subida: si se borra y se vuelve a subir la misma palabra,
+  // el FastDL no le deja al jugador el audio viejo ("Skipping existing file")
+  const file = name + '_' + Date.now().toString(36);
+  list.push({ name, file, volume, added: day });
   await commitFiles(env, [
-    { path: SOUND_DIR + '/' + name + '.mp3', b64: mp3 },
-    { path: SOUND_DIR + '/' + name + '.mp3.bz2', b64: bz2 },
+    { path: SOUND_DIR + '/' + file + '.mp3', b64: mp3 },
+    { path: SOUND_DIR + '/' + file + '.mp3.bz2', b64: bz2 },
     { path: LIST_PATH, text: listJson(list) }
   ], 'SaySounds: añadir ' + name + (admin ? ' (admin)' : ''));
 
@@ -215,10 +218,14 @@ async function remove(request, env) {
   const name = (await request.text()).trim();
   if (!/^[a-z0-9_]{2,31}$/.test(name)) return json({ error: 'Nombre inválido' }, 400);
 
-  const list = ((await readJson(env, LIST_PATH, { sounds: [] })).sounds || []).filter(s => s.name !== name);
+  const all = (await readJson(env, LIST_PATH, { sounds: [] })).sounds || [];
+  const entry = all.find(s => s.name === name);
+  if (!entry) return json({ error: 'No existe ese sonido' }, 404);
+  const file = entry.file || entry.name;
+  const list = all.filter(s => s.name !== name);
   await commitFiles(env, [
-    { path: SOUND_DIR + '/' + name + '.mp3', remove: true },
-    { path: SOUND_DIR + '/' + name + '.mp3.bz2', remove: true },
+    { path: SOUND_DIR + '/' + file + '.mp3', remove: true },
+    { path: SOUND_DIR + '/' + file + '.mp3.bz2', remove: true },
     { path: LIST_PATH, text: listJson(list) }
   ], 'SaySounds: quitar ' + name);
   return json({ ok: true });

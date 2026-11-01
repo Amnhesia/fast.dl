@@ -56,30 +56,8 @@
   <h1>SaySounds <span>FRAN SERVER</span></h1>
   <p class="sub">Sube un sonido y escríbelo en el chat del servidor. Se convierte, se comprime y se publica solo; el servidor lo descarga y entra desde el próximo cambio de mapa.</p>
 
-  <section id="tokenBox">
-    <h2>Acceso</h2>
-    <label for="token">Token de GitHub (se guarda solo en este navegador)</label>
-    <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
-    <div class="actions">
-      <button id="saveToken">Guardar</button>
-      <button class="ghost" id="clearToken">Olvidar</button>
-      <span class="pill" id="tokenState">sin token: solo escuchar</span>
-    </div>
-    <details>
-      <summary>¿Cómo creo el token? (una sola vez)</summary>
-      <ol>
-        <li>Entra a <code>github.com/settings/personal-access-tokens/new</code> con la cuenta <b>Amnhesia</b>.</li>
-        <li>Nombre: <code>saysounds</code>. Caducidad: la que quieras.</li>
-        <li>Repository access → <b>Only select repositories</b> → <code>fast.dl</code>.</li>
-        <li>Permissions → Repository → <b>Contents: Read and write</b>.</li>
-        <li>Generate token, cópialo y pégalo aquí.</li>
-      </ol>
-      <p class="hint">El token solo puede tocar el repo fast.dl. No lo compartas: quien lo tenga puede subir y borrar sonidos.</p>
-    </details>
-  </section>
-
   <section>
-    <h2>Subir sonido</h2>
+    <h2>Subir sonido <span class="pill" id="remaining">…</span></h2>
     <label for="file">Archivo de audio (mp3, wav, ogg, m4a…)</label>
     <input type="file" id="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac">
     <div class="row">
@@ -112,7 +90,21 @@
     <div class="status" id="listStatus"></div>
   </section>
 
-  <p class="hint">Formato final: MP3 mono 44,1 kHz 128 kbps sin etiquetas (lo que mejor reproduce Left 4 Dead 2), más su .bz2 para el FastDL. Las palabras solo pueden llevar minúsculas, números y guion bajo.</p>
+  <section>
+    <details id="adminBox">
+      <summary>Admin</summary>
+      <label for="adminKey">Clave de admin (se guarda solo en este navegador)</label>
+      <input type="password" id="adminKey" autocomplete="off">
+      <div class="actions">
+        <button id="saveAdmin">Entrar</button>
+        <button class="ghost" id="clearAdmin">Salir</button>
+        <span class="pill" id="adminState">no</span>
+      </div>
+      <p class="hint">Con la clave puedes borrar sonidos y subir sin límite diario.</p>
+    </details>
+  </section>
+
+  <p class="hint">Cada persona puede subir 2 sonidos al día. Formato final: MP3 mono 44,1 kHz 128 kbps sin etiquetas (lo que mejor reproduce Left 4 Dead 2), más su .bz2 para el FastDL. Las palabras solo pueden llevar minúsculas, números y guion bajo.</p>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
@@ -126,42 +118,56 @@ const API = 'https://api.github.com/repos/' + REPO;
 const RATE = 44100, KBPS = 128;
 
 const $ = id => document.getElementById(id);
-let token = '';
-try { token = localStorage.getItem('ss_token') || ''; } catch (e) {}
+let worker = '';          // URL del Cloudflare Worker (saysounds/config.json)
+let adminKey = '';
+try { adminKey = localStorage.getItem('ss_admin') || ''; } catch (e) {}
 let sounds = [];          // [{name, volume, added}]
 let serverNames = [];     // palabras que ya usa saysounds.cfg en el servidor
 let converted = null;     // {mp3: Uint8Array, seconds}
+let remaining = null;     // subidas que le quedan hoy a esta IP
 
 function setStatus(el, text, kind) { el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); }
-function showToken() {
-  $('token').value = token ? '••••••••' : '';
-  $('tokenState').textContent = token ? 'token guardado: puedes subir y borrar' : 'sin token: solo escuchar';
-  updateButtons();
+
+function showAdmin() {
+  $('adminKey').value = adminKey ? '••••••••' : '';
+  $('adminState').textContent = adminKey ? 'sí' : 'no';
+  if (adminKey) $('adminBox').open = true;
+  renderList();
+  refreshRemaining();
 }
-$('saveToken').onclick = () => {
-  const v = $('token').value.trim();
+$('saveAdmin').onclick = () => {
+  const v = $('adminKey').value.trim();
   if (!v || v.startsWith('•')) return;
-  token = v;
-  try { localStorage.setItem('ss_token', token); } catch (e) {}
-  showToken(); renderList();
+  adminKey = v;
+  try { localStorage.setItem('ss_admin', adminKey); } catch (e) {}
+  showAdmin();
 };
-$('clearToken').onclick = () => {
-  token = '';
-  try { localStorage.removeItem('ss_token'); } catch (e) {}
-  showToken(); renderList();
+$('clearAdmin').onclick = () => {
+  adminKey = '';
+  try { localStorage.removeItem('ss_admin'); } catch (e) {}
+  showAdmin();
 };
 
-// ----------------------------------------------------------------------------- GitHub
-async function gh(path, opts = {}) {
-  const headers = Object.assign({ 'Accept': 'application/vnd.github+json' }, opts.headers || {});
-  if (token) headers['Authorization'] = 'Bearer ' + token;
-  const res = await fetch(path.startsWith('http') ? path : API + path, Object.assign({}, opts, { headers }));
-  if (!res.ok) {
-    let msg = res.status + '';
-    try { msg += ' ' + (await res.json()).message; } catch (e) {}
-    const err = new Error(msg); err.status = res.status; throw err;
-  }
-  return res.status === 204 ? null : res.json();
+// ----------------------------------------------------------------------------- Worker
+async function callWorker(path, body) {
+  if (!worker) throw new Error('La subida todavía no está configurada en esta web.');
+  const headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+  if (adminKey) headers['X-Admin-Key'] = adminKey;
+  const res = await fetch(worker + path, body === undefined ? { headers } : { method: 'POST', headers, body });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(data.error || ('error ' + res.status));
+  return data;
+}
+
+async function refreshRemaining() {
+  if (!worker) { $('remaining').textContent = 'subida no configurada'; return; }
+  try {
+    const st = await callWorker('/status');
+    remaining = st.remaining;
+    $('remaining').textContent = st.admin ? 'admin: sin límite' : ('te quedan ' + st.remaining + ' de ' + st.perDay + ' hoy');
+  } catch (e) { $('remaining').textContent = 'sin conexión'; }
+  updateButtons();
 }
 
 function b64(bytes) {
@@ -173,7 +179,7 @@ function b64(bytes) {
 async function readList() {
   try {
     const raw = await fetch(API + '/contents/' + LIST_PATH + '?ref=' + BRANCH + '&t=' + Date.now(), {
-      headers: Object.assign({ 'Accept': 'application/vnd.github.raw+json' }, token ? { 'Authorization': 'Bearer ' + token } : {})
+      headers: { 'Accept': 'application/vnd.github.raw+json' }
     });
     if (raw.status === 404) return [];
     if (!raw.ok) throw new Error(raw.status + '');
@@ -182,34 +188,6 @@ async function readList() {
   } catch (e) {
     throw new Error('No se pudo leer la lista (' + e.message + ')');
   }
-}
-
-// Un commit con varios archivos a la vez (blobs -> árbol -> commit -> rama). files: [{path, bytes|text|delete}]
-async function commitFiles(files, message) {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const ref = await gh('/git/ref/heads/' + BRANCH);
-    const head = await gh('/git/commits/' + ref.object.sha);
-    const tree = [];
-    for (const f of files) {
-      if (f.delete) { tree.push({ path: f.path, mode: '100644', type: 'blob', sha: null }); continue; }
-      const blob = f.text !== undefined
-        ? await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: f.text, encoding: 'utf-8' }) })
-        : await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: b64(f.bytes), encoding: 'base64' }) });
-      tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
-    }
-    const newTree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree }) });
-    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: newTree.sha, parents: [ref.object.sha] }) });
-    try {
-      await gh('/git/refs/heads/' + BRANCH, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
-      return;
-    } catch (e) {
-      if (e.status !== 422 || attempt === 2) throw e;   // alguien subió algo a la vez: reintentar
-    }
-  }
-}
-
-function listJson(list) {
-  return JSON.stringify({ sounds: list.map(s => ({ name: s.name, volume: s.volume, added: s.added })) }, null, 2) + '\n';
 }
 
 // ----------------------------------------------------------------------------- Audio
@@ -290,7 +268,7 @@ function nameProblem(name) {
 function updateButtons() {
   const hasFile = !!$('file').files[0];
   $('convert').disabled = !hasFile;
-  $('upload').disabled = !hasFile || !token;
+  $('upload').disabled = !hasFile || !worker || remaining === 0;
 }
 
 async function ensureConverted() {
@@ -322,37 +300,27 @@ $('upload').onclick = async () => {
     await new Promise(r => setTimeout(r, 30));
     const bz = Bzip2.compress(c.mp3);
 
-    setStatus($('upStatus'), 'Subiendo a GitHub…');
-    const fresh = await readList();
-    if (fresh.some(s => s.name === name)) throw new Error('Alguien acaba de subir un sonido con esa palabra.');
-    const list = fresh.concat([{ name, volume: +(+$('volume').value).toFixed(1), added: new Date().toISOString().slice(0, 10) }]);
-    await commitFiles([
-      { path: SOUND_DIR + '/' + name + '.mp3', bytes: c.mp3 },
-      { path: SOUND_DIR + '/' + name + '.mp3.bz2', bytes: bz },
-      { path: LIST_PATH, text: listJson(list) }
-    ], 'SaySounds: añadir ' + name);
+    setStatus($('upStatus'), 'Subiendo…');
+    const volume = (+$('volume').value).toFixed(1);
+    const res = await callWorker('/upload', name + '\n' + volume + '\n' + b64(c.mp3) + '\n' + b64(bz));
 
-    sounds = list;
+    sounds = await readList().catch(() => sounds.concat([{ name, volume: +volume }]));
     renderList();
     setStatus($('upStatus'), '¡Subido! El servidor lo descarga en 1-3 minutos y queda activo desde el próximo cambio de mapa.\nEn el chat: ' + name, 'ok');
     $('file').value = ''; $('name').value = ''; converted = null; $('preview').hidden = true;
+    if (typeof res.remaining === 'number') remaining = res.remaining;
   } catch (e) {
-    setStatus($('upStatus'), 'Error: ' + e.message + (e.status === 401 || e.status === 403 || e.status === 404 ? '\nRevisa el token (permiso Contents: Read and write en fast.dl).' : ''), 'bad');
+    setStatus($('upStatus'), 'Error: ' + e.message, 'bad');
   }
-  updateButtons();
+  refreshRemaining();
 };
 
 async function removeSound(name) {
   if (!confirm('¿Borrar el sonido "' + name + '"? Se quita del servidor en el próximo mapa.')) return;
   try {
     setStatus($('listStatus'), 'Borrando…');
-    const fresh = (await readList()).filter(s => s.name !== name);
-    await commitFiles([
-      { path: SOUND_DIR + '/' + name + '.mp3', delete: true },
-      { path: SOUND_DIR + '/' + name + '.mp3.bz2', delete: true },
-      { path: LIST_PATH, text: listJson(fresh) }
-    ], 'SaySounds: quitar ' + name);
-    sounds = fresh;
+    await callWorker('/delete', name);
+    sounds = sounds.filter(s => s.name !== name);
     renderList();
     setStatus($('listStatus'), 'Borrado "' + name + '".', 'ok');
   } catch (e) { setStatus($('listStatus'), 'Error: ' + e.message, 'bad'); }
@@ -377,7 +345,7 @@ function renderList() {
     au.src = 'https://raw.githubusercontent.com/' + REPO + '/' + BRANCH + '/' + SOUND_DIR + '/' + s.name + '.mp3';
     a.appendChild(au);
     const d = tr.insertCell(); d.className = 'del';
-    if (token) {
+    if (adminKey) {
       const b = document.createElement('button');
       b.className = 'danger'; b.textContent = 'Borrar';
       b.onclick = () => removeSound(s.name);
@@ -389,6 +357,11 @@ function renderList() {
 async function loadAll() {
   setStatus($('listStatus'), '');
   try {
+    const r = await fetch('config.json?t=' + Date.now());
+    if (r.ok) worker = ((await r.json()).worker || '').replace(/\/+$/, '');
+  } catch (e) {}
+  refreshRemaining();
+  try {
     sounds = await readList();
     renderList();
   } catch (e) { setStatus($('listStatus'), e.message, 'bad'); }
@@ -399,7 +372,7 @@ async function loadAll() {
 }
 $('reload').onclick = loadAll;
 
-showToken();
+showAdmin();
 loadAll();
 </script>
 </body>

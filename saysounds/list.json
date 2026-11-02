@@ -28,6 +28,12 @@
       "file": "bolivia_mvyput1e",
       "volume": 1,
       "added": "2026-11-02"
+    },
+    {
+      "name": "ww",
+      "file": "ww_mvypwi31",
+      "volume": 1,
+      "added": "2026-11-02"
     }
   ]
 }

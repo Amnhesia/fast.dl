@@ -190,6 +190,12 @@
       "file": "temasoa_mwed4nws",
       "volume": 1.6,
       "added": "2026-11-13"
+    },
+    {
+      "name": "medic",
+      "file": "medic_mwfvoeki",
+      "volume": 1.7,
+      "added": "2026-11-14"
     }
   ]
 }

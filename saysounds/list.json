@@ -208,6 +208,12 @@
       "file": "5noche_mwx06dr0",
       "volume": 1.5,
       "added": "2026-11-26"
+    },
+    {
+      "name": "peruano",
+      "file": "peruano_mwx07gl8",
+      "volume": 1.5,
+      "added": "2026-11-26"
     }
   ]
 }
